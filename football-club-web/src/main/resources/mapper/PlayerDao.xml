@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcw.footballclubweb.dao.PlayerDao">
+
+    <resultMap type="com.fcw.footballclubweb.entity.Player" id="PlayerMap">
+        <result property="playerId" column="player_id" jdbcType="VARCHAR"/>
+        <result property="playerName" column="player_name" jdbcType="VARCHAR"/>
+        <result property="playerNoun" column="player_noun" jdbcType="INTEGER"/>
+        <result property="playerAge" column="player_age" jdbcType="INTEGER"/>
+        <result property="playerPosition" column="player_position" jdbcType="INTEGER"/>
+        <result property="comeTime" column="come_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        player_id, player_name, player_noun, player_age, player_position, come_time
+    </sql>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="PlayerMap">
+        select
+        <include refid="Base_Column_List"/>
+        from player
+        where player_id = #{playerId}
+    </select>
+
+    <!--全部查询-->
+    <select id="queryAll" resultMap="PlayerMap">
+        select
+        <include refid="Base_Column_List"/>
+        from player
+        <where>
+            <if test="playerId != null and playerId != ''">
+                and player_id = #{playerId}
+            </if>
+            <if test="playerName != null and playerName != ''">
+                and player_name like #{playerName}
+            </if>
+            <if test="playerNoun != null">
+                and player_noun = #{playerNoun}
+            </if>
+            <if test="playerPosition != null">
+                and player_position = #{playerPosition}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="playerId" useGeneratedKeys="true">
+        insert into player(player_name, player_noun, player_age, player_position, come_time)
+        values (#{playerName}, #{playerNoun}, #{playerAge}, #{playerPosition}, #{comeTime})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="playerId" useGeneratedKeys="true">
+        insert into player(player_name, player_noun, player_age, player_position, come_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.playerName}, #{entity.playerNoun}, #{entity.playerAge}, #{entity.playerPosition}, #{entity.comeTime})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="playerId" useGeneratedKeys="true">
+        insert into player(player_name, player_noun, player_age, player_position, come_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.playerName}, #{entity.playerNoun}, #{entity.playerAge}, #{entity.playerPosition}, #{entity.comeTime})
+        </foreach>
+        on duplicate key update
+        player_name = values(player_name),
+        player_noun = values(player_noun),
+        player_age = values(player_age),
+        player_position = values(player_position),
+        come_time = values(come_time)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update player
+        <set>
+            <if test="playerName != null and playerName != ''">
+                player_name = #{playerName},
+            </if>
+            <if test="playerNoun != null">
+                player_noun = #{playerNoun},
+            </if>
+            <if test="playerAge != null">
+                player_age = #{playerAge},
+            </if>
+            <if test="playerPosition != null">
+                player_position = #{playerPosition},
+            </if>
+            <if test="comeTime != null">
+                come_time = #{comeTime},
+            </if>
+        </set>
+        where player_id = #{playerId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from player where player_id = #{playerId}
+    </delete>
+
+</mapper>
+
